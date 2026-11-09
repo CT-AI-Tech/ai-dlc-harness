@@ -1,0 +1,129 @@
+# Flat, cheap lookup layer. Agents/skills query THIS first — never load the full
+# guardrail .md bodies to decide relevance. Each entry mirrors a guardrail file's
+# frontmatter (schema/guardrail.schema.json). Regenerate this file whenever a guardrail
+# file's frontmatter changes (a small script, not a human task, once this leaves pilot).
+#
+# Lookup pattern: filter by vertical + lifecycle_phase, intersect applicability_tags
+# with the current task's tags, then load only the matched `path` files.
+
+version: 1
+generated_from: "guardrail frontmatter under verticals/ and cross-cutting/"
+last_generated: 2026-11-02
+
+guardrails:
+  - id: GR-MD-CLASS-001
+    title: SaMD classification must be settled before spec work starts
+    vertical: medical-devices
+    lifecycle_phase: constitution
+    binding_tier: binding
+    applicability_tags: [software-as-medical-device, clinical-decision-support, diagnostic, treat-or-diagnose]
+    summary: SaMD risk category must be determined and recorded before feature specs are written; it dictates every downstream guardrail's rigor.
+    path: verticals/medical-devices/constitution/samd-classification.md
+
+  - id: GR-MD-CYBER-001
+    title: Network-connected devices need a cybersecurity plan in the spec
+    vertical: medical-devices
+    lifecycle_phase: constitution
+    binding_tier: binding
+    applicability_tags: [connected-device, network-interface, software-as-medical-device, cloud-connected]
+    summary: SBOM, threat model, and update/patch mechanism must be spec requirements for any connected device, not retrofitted later.
+    path: verticals/medical-devices/constitution/cybersecurity-premarket.md
+
+  - id: GR-MD-SDLC-001
+    title: Code/test generation must match the IEC 62304 software safety class
+    vertical: medical-devices
+    lifecycle_phase: development
+    binding_tier: binding
+    applicability_tags: [software-as-medical-device, embedded-device-software, connected-device]
+    summary: Safety class (A/B/C) determines required rigor for generated tests, docs, and traceability.
+    path: verticals/medical-devices/development/software-lifecycle-iec62304.md
+
+  - id: GR-MD-RISK-001
+    title: New failure modes from generated code must feed back into the risk file
+    vertical: medical-devices
+    lifecycle_phase: development
+    binding_tier: binding
+    applicability_tags: [software-as-medical-device, embedded-device-software, connected-device]
+    summary: New dependencies/network calls/failure paths are candidate risk-file updates, not just code changes.
+    path: verticals/medical-devices/development/risk-management-iso14971.md
+
+  - id: GR-MD-TRACE-001
+    title: Merged code must be traceable back to a design-controlled requirement
+    vertical: medical-devices
+    lifecycle_phase: review
+    binding_tier: binding
+    applicability_tags: [software-as-medical-device, design-controls, verification]
+    summary: Every design-controlled change must trace to a requirement and have verification evidence, checked at review time.
+    path: verticals/medical-devices/review/design-controls-traceability.md
+
+  - id: GR-HIPAA-SEC-001
+    title: PHI at rest/in transit requires HIPAA Security Rule technical safeguards
+    vertical: cross-cutting
+    lifecycle_phase: cross-cutting
+    binding_tier: binding
+    applicability_tags: [phi, patient-data, connected-device, cloud-connected, data-storage]
+    summary: Access control, audit controls, integrity controls, and transmission security for any system touching ePHI.
+    path: cross-cutting/hipaa/security-rule-technical-safeguards.md
+
+  - id: GR-HIPAA-PRIV-001
+    title: Only request/expose the minimum necessary PHI for the stated purpose
+    vertical: cross-cutting
+    lifecycle_phase: cross-cutting
+    binding_tier: binding
+    applicability_tags: [phi, patient-data, api-design, data-export]
+    summary: API/export/UI field scope for PHI must map to the specific use case, not the full record.
+    path: cross-cutting/hipaa/privacy-rule-minimum-necessary.md
+
+  - id: GR-GEN-DEID-001
+    title: Research/analytics use of patient data needs a recorded de-identification method and consent basis
+    vertical: cross-cutting
+    lifecycle_phase: cross-cutting
+    binding_tier: binding
+    applicability_tags: [research, analytics, deidentification, secondary-use]
+    summary: De-identification method (Safe Harbor/Expert Determination) and consent/IRB basis must be recorded before building the pipeline.
+    path: cross-cutting/general/deidentification-and-consent.md
+
+  - id: GR-EHR-CERT-001
+    title: Whether the product touches certified Health IT functionality must be settled before spec work starts
+    vertical: ehr
+    lifecycle_phase: constitution
+    binding_tier: binding
+    applicability_tags: [ehr-platform-feature, ehr-interoperability-app, certified-health-it]
+    summary: Certification scope (platform vs. interoperability shape) must be determined and recorded before feature specs are written; every other EHR guardrail depends on it.
+    path: verticals/ehr/constitution/onc-certification-scope.md
+
+  - id: GR-EHR-INFOBLOCK-001
+    title: Any feature that could restrict EHI access/exchange/use must be checked against the information blocking exceptions
+    vertical: ehr
+    lifecycle_phase: constitution
+    binding_tier: binding
+    applicability_tags: [ehr-platform-feature, health-information-network, api-access-restriction]
+    summary: A feature that gates, throttles, or paywalls EHI must map to one of the 8 information-blocking exceptions, documented at spec time.
+    path: verticals/ehr/constitution/information-blocking.md
+
+  - id: GR-EHR-SMART-001
+    title: Third-party apps consuming EHR data must use SMART App Launch v2.0.0 with minimum-necessary scopes
+    vertical: ehr
+    lifecycle_phase: development
+    binding_tier: binding
+    applicability_tags: [ehr-interoperability-app, smart-on-fhir, third-party-app]
+    summary: Integrations must use SMART App Launch v2.0.0 (not deprecated v1.0.0) and request only the FHIR scopes the feature actually needs.
+    path: verticals/ehr/development/smart-on-fhir-authorization.md
+
+  - id: GR-EHR-USCDI-001
+    title: Health data exchanged with an EHR must map to standard USCDI data classes, not ad hoc fields
+    vertical: ehr
+    lifecycle_phase: development
+    binding_tier: binding
+    applicability_tags: [ehr-platform-feature, ehr-interoperability-app, fhir-data-exchange]
+    summary: New EHR-facing data fields must map to a USCDI data class/element and US Core FHIR profile, not a custom shape.
+    path: verticals/ehr/development/uscdi-data-mapping.md
+
+  - id: GR-EHR-TEST-001
+    title: Merged EHR-facing API code must have conformance test evidence, not just unit test coverage
+    vertical: ehr
+    lifecycle_phase: review
+    binding_tier: binding
+    applicability_tags: [ehr-platform-feature, ehr-interoperability-app, certified-health-it]
+    summary: Changes to certified API endpoints or US Core mappings need conformance test evidence (e.g. Inferno), checked at review time.
+    path: verticals/ehr/review/interoperability-conformance-testing.md

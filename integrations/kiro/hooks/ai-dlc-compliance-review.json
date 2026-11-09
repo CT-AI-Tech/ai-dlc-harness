@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "AI-DLC compliance check — review phase",
+      "description": "Fires when a source file is saved. Loads only the harness's review-phase guardrails (vertical + cross-cutting) and surfaces traceability/evidence findings before the change is considered done. Adjust the matcher to your project's actual source extensions and paths.",
+      "trigger": "PostFileSave",
+      "matcher": "\\.(py|ts|tsx|js|jsx|java|cs|go)$",
+      "action": {
+        "type": "agent",
+        "prompt": "Run the AI-DLC compliance harness check for the review phase on the file that was just saved. Read .kiro/steering/ai-dlc-compliance.md for the harness location and this project's vertical. Query <harness_path>/registry/guardrail-index.yaml for entries where vertical matches this project's vertical (or 'cross-cutting') AND lifecycle_phase is 'review' (or 'cross-cutting'). Load only the matched guardrail files. Report binding findings as blocking and advisory findings as flagged notes. Record what was checked under <evidence_dir>/<feature-slug>/guardrails-applied.md (default evidence_dir: .kiro/compliance)."
+      },
+      "enabled": true
+    }
+  ]
+}
