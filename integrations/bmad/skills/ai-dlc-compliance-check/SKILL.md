@@ -16,16 +16,31 @@ This mirrors `speckit.ai-dlc-compliance.check` in the Speckit adapter; read that
 first if you want the fuller inline commentary — this file only calls out what's
 different for BMAD.
 
-## Step 1 — Load config, degrade gracefully if absent
+## Step 1 — Load config, auto-fetch the harness if missing, degrade gracefully if absent
 
 Read `_bmad/custom/ai-dlc-compliance/compliance-config.yml` (same shape as the
 Speckit adapter's `compliance-config.yml`: `harness_path`, `vertical`,
-`block_on_binding`, `enabled_phases`, `evidence_dir`).
+`harness_repo_url`, `block_on_binding`, `enabled_phases`, `evidence_dir`).
 
 - Missing → skip silently with a one-line note
   (`[ai-dlc-compliance] no compliance-config.yml found, skipping guardrail check`).
   Never fail the calling workflow.
-- `harness_path` unresolvable → warn once, skip, never fail the calling workflow.
+- `harness_repo_url` absent from the config → default to
+  `https://github.com/CT-AI-Tech/ai-dlc-harness.git`.
+
+**Resolve `harness_path`** — identical algorithm to the Speckit adapter:
+
+1. If `<harness_path>/registry/guardrail-index.yaml` already exists, use it as-is.
+   Never touch an existing checkout.
+2. If `<harness_path>` does not exist at all, fetch it once, automatically:
+   `git clone --depth 1 <harness_repo_url> <harness_path>`, falling back to a zip
+   download from the codeload form of the URL
+   (`https://codeload.github.com/<owner>/<repo>/zip/refs/heads/<branch>`) if `git`
+   isn't available or the clone fails. Report the fetch once, visibly, and drop
+   `<harness_path>/.ai-dlc-harness-autofetched` on success.
+3. If both the clone and zip fallback fail, or `registry/guardrail-index.yaml` is
+   still missing/unparsable afterward, warn once and skip — never fail the calling
+   workflow.
 
 ## Step 2 — Determine the phase from the invocation argument
 
@@ -81,6 +96,7 @@ the workflow has already started talking.
 
 ## Graceful degradation
 
-Identical to the Speckit adapter: missing config, unresolvable `harness_path`, or an
-unparsable `guardrail-index.yaml` all skip with a warning and never fail the calling
-BMAD workflow for the adapter's own infrastructure problems.
+Identical to the Speckit adapter: missing config, a `harness_path` unresolvable even
+after the Step 1 auto-fetch attempt, or an unparsable `guardrail-index.yaml` all skip
+with a warning and never fail the calling BMAD workflow for the adapter's own
+infrastructure problems.
