@@ -1,0 +1,23 @@
+# AI-DLC Compliance Guardrail Harness - generic (no-framework) project configuration
+# Copy to your project root as compliance-config.yml (or wherever your project keeps
+# config; there's no fixed convention here since no framework dictates one).
+
+# Path to the ai-dlc-harness checkout, relative to this project's root (or absolute).
+harness_path: "../ai-dlc-harness"
+
+# Which vertical under <harness_path>/verticals/ applies to this project.
+vertical: "medical-devices"
+
+# If true, a missing/unresolved BINDING guardrail should stop you and ask the user to
+# resolve it. If false, binding guardrails are surfaced but never block.
+block_on_binding: true
+
+# There's no automatic hook system here, so "enabled_phases" is really just a record
+# of which phases this project has decided to check manually.
+enabled_phases:
+  constitution: true
+  development: true
+  review: true
+
+# Where evidence (which guardrails were loaded/applied, and when) is recorded.
+evidence_dir: ".ai-dlc-compliance"

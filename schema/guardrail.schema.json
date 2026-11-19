@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://internal/ai-dlc-harness/guardrail.schema.json",
+  "title": "Guardrail frontmatter",
+  "description": "YAML frontmatter required at the top of every guardrail markdown file. Keep this small and flat — it is what gets loaded into registry/guardrail-index.yaml for cheap lookup, so every field here is a lookup/filter key, not prose.",
+  "type": "object",
+  "required": [
+    "id", "title", "vertical", "lifecycle_phase", "binding_tier",
+    "source", "version", "effective_date", "applicability_tags",
+    "owner", "last_reviewed", "summary"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^GR-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$",
+      "description": "Stable id, e.g. GR-MD-CYBER-001. Never reused, even if the guardrail is retired."
+    },
+    "title": { "type": "string" },
+    "vertical": {
+      "type": "string",
+      "description": "Matches a folder under verticals/, or 'cross-cutting' for shared rules."
+    },
+    "lifecycle_phase": {
+      "type": "string",
+      "enum": ["constitution", "development", "review", "cross-cutting"],
+      "description": "When in the Speckit pipeline this guardrail should be loaded."
+    },
+    "binding_tier": {
+      "type": "string",
+      "enum": ["binding", "advisory"],
+      "description": "binding = hard regulatory/legal requirement, agent should block. advisory = best practice, agent should flag and continue."
+    },
+    "source": {
+      "type": "string",
+      "description": "Human-readable citation, e.g. 'FDA Guidance: Cybersecurity in Medical Devices (Sept 2023)'."
+    },
+    "citation_url": { "type": "string", "format": "uri" },
+    "version": {
+      "type": "string",
+      "description": "Version of the *source regulation/guidance*, not of this file."
+    },
+    "effective_date": { "type": "string", "format": "date" },
+    "supersedes": {
+      "type": ["string", "null"],
+      "description": "id of a guardrail this one replaces, if any."
+    },
+    "related_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Other guardrail ids this one traces to, depends on, or conflicts with. Mirrored into registry/relationships.yaml with the edge type."
+    },
+    "applicability_tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Tags an agent matches against task/spec context, e.g. ['software-as-medical-device', 'connected-device']."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Team or role accountable for this content's accuracy (see governance/CONTENT-OWNERS.md), not the engineer who wrote the file."
+    },
+    "last_reviewed": { "type": "string", "format": "date" },
+    "review_due": { "type": "string", "format": "date" },
+    "summary": {
+      "type": "string",
+      "maxLength": 280,
+      "description": "One or two sentences. This is what gets shown in INDEX.md and the registry — write it so an agent can decide relevance WITHOUT opening the file."
+    }
+  }
+}

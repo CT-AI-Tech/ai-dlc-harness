@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "AI-DLC compliance check — development phase",
+      "description": "Fires when design.md or tasks.md is saved. Loads only the harness's development-phase guardrails (vertical + cross-cutting) for this project and surfaces binding/advisory findings before implementation starts.",
+      "trigger": "PostFileSave",
+      "matcher": "(design|tasks)\\.md$",
+      "action": {
+        "type": "agent",
+        "prompt": "Run the AI-DLC compliance harness check for the development phase. Read .kiro/steering/ai-dlc-compliance.md for the harness location and this project's vertical. Query <harness_path>/registry/guardrail-index.yaml for entries where vertical matches this project's vertical (or 'cross-cutting') AND lifecycle_phase is 'development' (or 'cross-cutting'). Load only the matched guardrail files. Report binding findings as blocking (ask the user to resolve before implementation proceeds) and advisory findings as flagged notes. Record what was checked under <evidence_dir>/<feature-slug>/guardrails-applied.md (default evidence_dir: .kiro/compliance)."
+      },
+      "enabled": true
+    }
+  ]
+}

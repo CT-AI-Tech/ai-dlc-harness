@@ -1,0 +1,90 @@
+# Graph-seed edge list. NOT a knowledge graph — a flat, versioned, human-reviewable
+# list of relationships between guardrails. This exists so that if/when a real
+# cross-vertical traceability need shows up (see governance/DECISIONS.md), it can be
+# loaded straight into a graph DB (nodes = guardrail ids, edges = these rows) without
+# re-authoring any guardrail content.
+#
+# edge_type values:
+#   traces_to     - satisfying/considering `from` requires also considering `to`
+#   depends_on    - `from` cannot be correctly applied until `to` is resolved
+#   conflicts_with- applying both naively may produce contradictory requirements;
+#                   needs a human decision on precedence
+#   supersedes    - `from` replaces `to` (older version/guidance)
+
+version: 1
+
+edges:
+  - from: GR-MD-CYBER-001
+    to: GR-MD-CLASS-001
+    edge_type: depends_on
+    note: Cybersecurity rigor expected scales with SaMD classification.
+
+  - from: GR-MD-SDLC-001
+    to: GR-MD-CLASS-001
+    edge_type: depends_on
+    note: IEC 62304 safety class is derived from the SaMD/hazard classification.
+
+  - from: GR-MD-RISK-001
+    to: GR-MD-SDLC-001
+    edge_type: traces_to
+    note: Risk control changes often require corresponding software lifecycle rigor.
+
+  - from: GR-MD-TRACE-001
+    to: GR-MD-SDLC-001
+    edge_type: traces_to
+    note: Traceability review checks the same requirement/design/code/test chain that 62304 mandates building.
+
+  - from: GR-MD-CYBER-001
+    to: GR-HIPAA-SEC-001
+    edge_type: traces_to
+    note: A connected medical device handling patient data must satisfy both FDA cybersecurity expectations and HIPAA technical safeguards - overlapping but not identical requirements.
+
+  - from: GR-HIPAA-PRIV-001
+    to: GR-GEN-DEID-001
+    edge_type: traces_to
+    note: Minimum-necessary scoping and de-identification are both PHI-minimization controls; a research export often needs both evaluated.
+
+  - from: GR-MD-RISK-001
+    to: GR-MD-CYBER-001
+    edge_type: conflicts_with
+    note: >
+      A security control added to mitigate a cyber risk (e.g., a mandatory update
+      check, a lockout after failed auth attempts) can itself introduce a safety risk
+      (device unusable during a clinical emergency). Needs explicit human precedence
+      call, not an automatic resolution - flag both guardrail owners.
+
+  - from: GR-EHR-INFOBLOCK-001
+    to: GR-EHR-CERT-001
+    edge_type: depends_on
+    note: Whether a restriction counts as information blocking, and who it binds, depends on the certification-scope determination (is this certified health IT / a health information network).
+
+  - from: GR-EHR-SMART-001
+    to: GR-EHR-CERT-001
+    edge_type: depends_on
+    note: Which SMART scopes are even available to request depends on what the target EHR has certified and exposed.
+
+  - from: GR-EHR-USCDI-001
+    to: GR-EHR-SMART-001
+    edge_type: traces_to
+    note: The FHIR resources a SMART scope grants access to are the same USCDI-mapped data classes GR-EHR-USCDI-001 governs - evaluate scope design and data mapping together.
+
+  - from: GR-EHR-TEST-001
+    to: GR-EHR-USCDI-001
+    edge_type: traces_to
+    note: Conformance testing verifies the same US Core / USCDI mapping that development-phase guardrail requires be correct in the first place.
+
+  - from: GR-EHR-USCDI-001
+    to: GR-HIPAA-PRIV-001
+    edge_type: traces_to
+    note: Mapping a field to its USCDI data class doesn't by itself satisfy minimum-necessary - an endpoint can expose a standard-mapped field more broadly than the use case needs. Evaluate both.
+
+  - from: GR-EHR-INFOBLOCK-001
+    to: GR-HIPAA-PRIV-001
+    edge_type: conflicts_with
+    note: >
+      Minimum-necessary (restrict PHI exposure) and information blocking (don't
+      interfere with EHI access) can pull in opposite directions on the same feature -
+      narrowing an API response for HIPAA minimum-necessary reasons can itself look
+      like an information-blocking restriction unless it maps to a named exception
+      (typically "privacy"). Needs explicit human precedence call, not an automatic
+      resolution - flag both guardrail owners.

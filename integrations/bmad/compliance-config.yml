@@ -1,0 +1,24 @@
+# AI-DLC Compliance Guardrail Harness - BMAD project configuration
+# Copy to {project-root}/_bmad/custom/ai-dlc-compliance/compliance-config.yml
+# Same shape as the Speckit adapter's compliance-config.yml, on purpose - one format
+# to learn across every framework this harness plugs into.
+
+# Path to the ai-dlc-harness checkout, relative to this project's root (or absolute).
+harness_path: "../ai-dlc-harness"
+
+# Which vertical under <harness_path>/verticals/ applies to this project.
+vertical: "medical-devices"
+
+# If true, a missing/unresolved BINDING guardrail stops the BMAD workflow and asks
+# the user to resolve it. If false, binding guardrails are surfaced but never block.
+block_on_binding: true
+
+# Run the compliance check at these phases. Set an entry to false to skip that phase
+# without removing the override TOML files.
+enabled_phases:
+  constitution: true
+  development: true
+  review: true
+
+# Where evidence is recorded, relative to this project's root.
+evidence_dir: "_bmad-output/compliance"
