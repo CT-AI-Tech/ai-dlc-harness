@@ -1,0 +1,20 @@
+{
+  "name": "flight-plan",
+  "version": "0.1.0",
+  "description": "Compile a requirement into a priced, simulated agentic build plan.",
+  "type": "module",
+  "main": "server/index.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "16.4.5",
+    "express": "4.21.2"
+  },
+  "optionalDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "3.637.0",
+    "google-auth-library": "9.14.1"
+  }
+}

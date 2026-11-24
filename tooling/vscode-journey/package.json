@@ -1,0 +1,81 @@
+{
+  "name": "aidlc-journey",
+  "displayName": "AI-DLC Journey",
+  "description": "Visual, persona-based views (Architect, Dev/Lead, QA) for a Speckit project using the AI-DLC compliance harness — guardrails, design plan, and test verification, live and always current.",
+  "version": "0.2.2",
+  "publisher": "ct-ai-tech",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onView:aidlcJourney.architectView",
+    "onView:aidlcJourney.devView",
+    "onView:aidlcJourney.qaView",
+    "workspaceContains:.specify"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aidlcJourney",
+          "title": "AI-DLC Journey",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "aidlcJourney": [
+        {
+          "id": "aidlcJourney.architectView",
+          "name": "Architect",
+          "type": "webview"
+        },
+        {
+          "id": "aidlcJourney.devView",
+          "name": "Dev / Lead",
+          "type": "webview"
+        },
+        {
+          "id": "aidlcJourney.qaView",
+          "name": "QA",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "aidlcJourney.refresh",
+        "title": "AI-DLC Journey: Refresh Now",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "aidlcJourney.refresh",
+          "when": "view == aidlcJourney.architectView || view == aidlcJourney.devView || view == aidlcJourney.qaView",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -p ./ --watch",
+    "verify": "node test-fixtures/verify.js",
+    "dev-preview": "node scripts/build-dev-preview.js"
+  },
+  "dependencies": {
+    "js-yaml": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.0",
+    "@types/vscode": "1.85.0",
+    "@types/js-yaml": "4.0.9",
+    "typescript": "5.4.5"
+  }
+}

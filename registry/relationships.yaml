@@ -88,3 +88,23 @@ edges:
       like an information-blocking restriction unless it maps to a named exception
       (typically "privacy"). Needs explicit human precedence call, not an automatic
       resolution - flag both guardrail owners.
+
+  - from: GR-ENG-ARCHBOUNDARY-001
+    to: GR-ENG-NUANCE-001
+    edge_type: traces_to
+    note: A high-nuance pattern used to route around an architecture boundary (e.g. a raw timer patching over a declarative/imperative clash) is the same failure this engineering-standards pair is designed to catch together.
+
+  - from: GR-ENG-COMMENT-001
+    to: GR-ENG-REPEATFIX-001
+    edge_type: traces_to
+    note: A workaround-justifying comment that keeps recurring is exactly the signal GR-ENG-REPEATFIX-001 says should convert into an enforced check instead of more prose.
+
+  - from: GR-ENG-ARCHBOUNDARY-001
+    to: GR-ENG-REPEATFIX-001
+    edge_type: traces_to
+    note: An architecture boundary with no enforcement tooling is a repeated-correction pattern waiting to happen - the same review finding, every time a boundary is crossed, until it's made deterministic.
+
+  - from: GR-ENG-DEPRECATED-001
+    to: GR-ENG-NUANCE-001
+    edge_type: traces_to
+    note: Deprecated patterns and high-nuance patterns are both cases of an agent copying what's statistically common in the codebase rather than what's actually correct.

@@ -1,0 +1,75 @@
+version: 1
+guardrails:
+  - id: GR-MD-CLASS-001
+    title: SaMD classification must be settled before spec work starts
+    vertical: medical-devices
+    lifecycle_phase: constitution
+    binding_tier: binding
+    applicability_tags: [software-as-medical-device, diagnostic]
+    summary: SaMD risk category must be determined and recorded before feature specs are written.
+    path: verticals/medical-devices/constitution/samd-classification.md
+
+  - id: GR-MD-CYBER-001
+    title: Network-connected devices need a cybersecurity plan in the spec
+    vertical: medical-devices
+    lifecycle_phase: constitution
+    binding_tier: binding
+    applicability_tags: [connected-device, network-interface]
+    summary: SBOM, threat model, and update/patch mechanism must be spec requirements for any connected device.
+    path: verticals/medical-devices/constitution/cybersecurity-premarket.md
+
+  - id: GR-MD-SDLC-001
+    title: Code/test generation must match the IEC 62304 software safety class
+    vertical: medical-devices
+    lifecycle_phase: development
+    binding_tier: binding
+    applicability_tags: [software-as-medical-device, connected-device]
+    summary: Safety class (A/B/C) determines required rigor for generated tests, docs, and traceability.
+    path: verticals/medical-devices/development/software-lifecycle-iec62304.md
+
+  - id: GR-MD-UX-004
+    title: Denial/error states need plain-language explanations
+    vertical: medical-devices
+    lifecycle_phase: development
+    binding_tier: advisory
+    applicability_tags: [patient-facing-ui]
+    summary: Status/denial reason codes should be explained in plain language, not just codes.
+    path: verticals/medical-devices/development/plain-language-ux.md
+
+  - id: GR-GEN-AUDIT-001
+    title: Every PHI access and status change needs an audit event
+    vertical: cross-cutting
+    lifecycle_phase: cross-cutting
+    binding_tier: binding
+    applicability_tags: [phi, audit-trail]
+    summary: HIPAA-aligned audit trail is required for all PHI access, independent of vertical.
+    path: cross-cutting/hipaa/audit-trail.md
+
+  - id: GR-MD-TRACE-001
+    title: Generated tests need design-control traceability
+    vertical: medical-devices
+    lifecycle_phase: review
+    binding_tier: advisory
+    applicability_tags: [design-controls, verification]
+    summary: Tests should trace back to requirements for design-control verification.
+    path: verticals/medical-devices/review/traceability.md
+
+  - id: GR-ENG-SECRETS-001
+    title: Generated code must never contain hardcoded secrets, keys, or credentials
+    vertical: cross-cutting
+    lifecycle_phase: development
+    binding_tier: binding
+    category: engineering
+    applicability_tags: [security, secrets-management, code-generation]
+    summary: API keys, passwords, tokens, and connection strings must come from a real secrets-management mechanism.
+    path: cross-cutting/engineering-standards/no-hardcoded-secrets.md
+
+  - id: GR-ENG-TESTHONESTY-001
+    title: A test-passing claim must be backed by an observed test execution
+    vertical: cross-cutting
+    lifecycle_phase: review
+    binding_tier: binding
+    category: engineering
+    applicability_tags: [testing, verification, code-review]
+    summary: Never report a test as passed based on code review alone.
+    path: cross-cutting/engineering-standards/test-verification-honesty.md

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "GR-MD-CLASS-001",
+    "title": "SaMD classification must be settled before spec work starts",
+    "phase": "constitution",
+    "binding_tier": "binding",
+    "applicability_tags": ["software-as-medical-device", "diagnostic"],
+    "finding": "Classified as Class II SaMD; recorded in constitution.md.",
+    "status": "passed",
+    "timestamp": "2026-11-20T10:00:00Z"
+  },
+  {
+    "id": "GR-MD-CYBER-001",
+    "title": "Network-connected devices need a cybersecurity plan in the spec",
+    "phase": "constitution",
+    "binding_tier": "binding",
+    "applicability_tags": ["connected-device", "network-interface"],
+    "finding": "SBOM present, but threat model section still a placeholder.",
+    "status": "flagged",
+    "timestamp": "2026-11-20T10:00:00Z"
+  },
+  {
+    "id": "GR-GEN-AUDIT-001",
+    "title": "Every PHI access and status change needs an audit event",
+    "phase": "constitution",
+    "binding_tier": "binding",
+    "applicability_tags": ["phi", "audit-trail"],
+    "finding": "No audit event design yet for status-change notifications.",
+    "status": "blocked",
+    "timestamp": "2026-11-20T10:00:00Z"
+  },
+  {
+    "id": "GR-MD-SDLC-001",
+    "title": "Code/test generation must match the IEC 62304 software safety class",
+    "phase": "development",
+    "binding_tier": "binding",
+    "applicability_tags": ["software-as-medical-device", "connected-device"],
+    "finding": "Safety Class B applied to the payer-integration retry logic.",
+    "status": "passed",
+    "timestamp": "2026-11-21T09:00:00Z",
+    "related_tasks": ["T014"],
+    "related_files": ["src/integration/payer-retry.ts"]
+  },
+  {
+    "id": "GR-MD-TRACE-001",
+    "title": "Generated tests need design-control traceability",
+    "phase": "review",
+    "binding_tier": "advisory",
+    "applicability_tags": ["design-controls", "verification"],
+    "finding": "Contract tests for the retry adapter trace to R2/R3; UI tests not yet linked.",
+    "status": "flagged",
+    "timestamp": "2026-11-22T09:00:00Z",
+    "related_tasks": ["T014", "T019"],
+    "related_files": ["src/integration/payer-retry.ts"]
+  },
+  {
+    "id": "GR-ENG-SECRETS-001",
+    "title": "Generated code must never contain hardcoded secrets, keys, or credentials",
+    "phase": "development",
+    "binding_tier": "binding",
+    "applicability_tags": ["security", "secrets-management", "code-generation"],
+    "finding": "Payer sandbox API key is read from PAYER_SANDBOX_KEY env var, not hardcoded.",
+    "status": "passed",
+    "timestamp": "2026-11-21T09:30:00Z",
+    "related_tasks": ["T014"],
+    "related_files": ["src/integration/payer-retry.ts"],
+    "evidence_refs": ["src/config/secrets.ts"]
+  },
+  {
+    "id": "GR-ENG-TESTHONESTY-001",
+    "title": "A test-passing claim must be backed by an observed test execution",
+    "phase": "review",
+    "binding_tier": "binding",
+    "applicability_tags": ["testing", "verification", "code-review"],
+    "finding": "Retry-adapter contract suite was actually run against the payer sandbox; results attached.",
+    "status": "passed",
+    "timestamp": "2026-11-22T09:15:00Z",
+    "evidence_refs": ["_bmad-output/test-runs/payer-retry-contract-2026-11-22.log", "https://github.com/CT-AI-Tech/demo-medtech/pull/42"]
+  }
+]

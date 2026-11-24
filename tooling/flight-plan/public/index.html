@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flight Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>body{margin:0}</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Flight Plan · Build Graph</span>
+      <h1 id="title">PA-142 <span>Prior Authorization Status Tracker</span></h1>
+    </div>
+    <span class="stamp" id="engine">Connecting…</span>
+  </header>
+
+  <section class="composer" aria-label="Requirement">
+    <div class="cust">
+      <label for="cust" class="eyebrow">Customer context</label>
+      <select id="cust"><option value="">None (best practice only)</option></select>
+      <button class="btn" type="button" id="custEdit" disabled>Edit</button>
+      <button class="btn" type="button" id="custNew">New customer</button>
+      <span class="src" id="custInfo"></span>
+    </div>
+    <label for="req">Requirement</label>
+    <textarea id="req" spellcheck="true" placeholder="Describe the epic in plain language: who needs what, which systems it touches, and any rules or deadlines."></textarea>
+    <div class="c-row">
+      <div class="presets">
+        <button class="btn" type="button" id="pPA">Sample: PA tracker</button>
+        <button class="btn" type="button" id="pIDR">Try: IDR dispute intake</button>
+        <button class="btn" type="button" id="pClear">Clear</button>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" id="stop" hidden>Stop</button>
+        <button class="btn" type="button" id="save">Save plan</button>
+        <button class="btn primary" type="button" id="compile">Compile plan</button>
+      </div>
+    </div>
+    <div class="lib"><label for="saved" class="eyebrow">Plan library</label><select id="saved"><option value="">Saved plans…</option></select><button class="btn" type="button" id="del" hidden>Delete</button></div>
+    <div class="status" id="status" role="status">Loading…</div>
+  </section>
+
+  <section class="brief">
+    <div class="diff" id="diff" hidden></div>
+    <p id="approach"></p>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="kpis" aria-label="Simulation summary">
+    <div class="kpi"><span class="eyebrow">Elapsed time</span><span class="v" id="kT">–</span><span class="s" id="kT9">–</span></div>
+    <div class="kpi"><span class="eyebrow">Tokens</span><span class="v" id="kK">–</span><span class="s" id="kK9">–</span></div>
+    <div class="kpi"><span class="eyebrow">Model cost</span><span class="v" id="kC">–</span><span class="s" id="kC9">–</span></div>
+    <div class="kpi"><span class="eyebrow">Human attention</span><span class="v" id="kH">–</span><span class="s" id="kH9">–</span></div>
+  </section>
+
+  <div class="main">
+    <section style="min-width:0">
+      <div class="tabs" role="tablist" id="tabs">
+        <button role="tab" id="tab-graph" data-tab="graph" aria-selected="true">Build graph</button>
+        <button role="tab" id="tab-reqs" data-tab="reqs" aria-selected="false">Requirements <span id="cReq"></span></button>
+        <button role="tab" id="tab-budget" data-tab="budget" aria-selected="false">Agents &amp; budget</button>
+        <button role="tab" id="tab-tests" data-tab="tests" aria-selected="false">Tests &amp; success</button>
+      </div>
+
+      <div id="v-graph">
+        <div class="legend">
+          <span><i class="lg"></i>Agent</span><span><i class="lg g"></i>Human gate</span>
+          <span><i class="lg s"></i>Auto-pass</span><span><i class="lg c"></i>Critical path</span>
+          <span><b class="ai-dot">◆</b> chosen by compiler</span>
+        </div>
+        <div class="graph-box">
+          <div class="graph" id="graph"></div>
+        </div>
+        <p class="foot">The compiler picks the design and build agents from the requirement. The platform adds the standard nodes, places human gates by rule, and prices every node from the agent catalog, so Claude never guesses a token count. High-risk gates always stay human. Rates are illustrative blended $/M tokens.</p>
+      </div>
+      <div id="v-reqs" hidden></div>
+      <div id="v-budget" hidden></div>
+      <div id="v-tests" hidden></div>
+    </section>
+
+    <aside class="aside">
+      <div class="panel">
+        <span class="eyebrow">Pre-flight simulation · 3,000 runs</span>
+        <div class="ctl"><label>Developers on the epic <small>review capacity</small></label><div class="seg" id="segDevs"></div></div>
+        <div class="ctl"><label>Autonomy <small id="autoNote"></small></label><div class="seg" id="segAuto"></div></div>
+        <div class="ctl"><label>Model routing <small id="mixNote"></small></label><div class="seg" id="segMix"></div></div>
+        <div class="hist" style="margin-top:14px">
+          <span class="eyebrow">Elapsed hours, distribution</span>
+          <svg id="hist" viewBox="0 0 340 128" role="img" aria-label="Histogram of simulated elapsed hours"></svg>
+        </div>
+        <div class="split">
+          <span class="eyebrow">Critical path, expected case</span>
+          <div class="track"><span class="a" id="spA"></span><span class="h" id="spH"></span></div>
+          <div class="leg"><span><i style="background:var(--accent)"></i><span id="spAl"></span></span><span><i style="background:var(--gate)"></i><span id="spHl"></span></span></div>
+        </div>
+        <p class="verdict" id="verdict"></p>
+        <div class="row2">
+          <button class="btn" id="rerun" type="button">Re-run simulation</button>
+          <button class="btn" id="copy" type="button">Copy plan JSON</button>
+        </div>
+      </div>
+      <div class="panel" id="detail" aria-live="polite"></div>
+    </aside>
+  </div>
+</div>
+<dialog id="ced" aria-labelledby="cedTitle">
+  <div class="ced-wrap">
+    <header class="ced-h"><h2 id="cedTitle">Customer</h2><button class="btn" type="button" id="cedClose" aria-label="Close editor">Close</button></header>
+    <div class="tabs" role="tablist" id="cedTabs">
+      <button type="button" role="tab" data-t="profile" aria-selected="true">Profile</button>
+      <button type="button" role="tab" data-t="docs" aria-selected="false">Documents</button>
+      <button type="button" role="tab" data-t="gates" aria-selected="false">Gate rules</button>
+      <button type="button" role="tab" data-t="est" aria-selected="false">Estimator</button>
+    </div>
+    <div id="cedBody" class="ced-body"></div>
+    <footer class="ced-f">
+      <span class="status" id="cedMsg" role="status"></span>
+      <div class="actions"><button class="btn" type="button" id="cedDel" hidden>Delete customer</button><button class="btn" type="button" id="cedCancel">Cancel</button><button class="btn primary" type="button" id="cedSave">Save customer</button></div>
+    </footer>
+  </div>
+</dialog>
+<script src="app.js"></script>
+</body>
+</html>

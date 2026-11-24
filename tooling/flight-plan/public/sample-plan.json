@@ -1,0 +1,368 @@
+{
+  "epic": {
+    "code": "PA-142",
+    "title": "Prior Authorization Status Tracker",
+    "summary": "Submit and track prior authorizations from the provider portal over FHIR PAS with an X12 278 fallback.",
+    "approach": "Model PAS resources first, then freeze contracts so the payer integration, status service and portal UI build in parallel. Deadline rules run beside the service, and verification proves both the FHIR and X12 paths with synthetic cases."
+  },
+  "brief": "Providers need to see where each prior authorization stands without calling the payer. Submit PA requests from the portal using FHIR PAS, track status live, fall back to X12 278 for payers without FHIR, and keep an audit trail that meets HIPAA and CMS-0057-F decision timelines.",
+  "flags": {
+    "phi": true,
+    "regulations": [
+      "HIPAA",
+      "CMS-0057-F"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Submit a PA request from the portal as a FHIR PAS Claim bundle ($submit).",
+      "type": "functional",
+      "ambiguity": 0.1,
+      "sources": []
+    },
+    {
+      "id": "R2",
+      "text": "Route each request to FHIR PAS or X12 278 based on payer capability.",
+      "type": "integration",
+      "ambiguity": 0.3,
+      "sources": []
+    },
+    {
+      "id": "R3",
+      "text": "Send X12 278 requests through the clearinghouse for payers without FHIR.",
+      "type": "integration",
+      "ambiguity": 0.4,
+      "sources": []
+    },
+    {
+      "id": "R4",
+      "text": "Track status (pended, approved, denied, more info) via $inquire polling.",
+      "type": "functional",
+      "ambiguity": 0.45,
+      "sources": []
+    },
+    {
+      "id": "R5",
+      "text": "Status tracker screen with filters by payer, status, provider and due date.",
+      "type": "functional",
+      "ambiguity": 0.15,
+      "sources": []
+    },
+    {
+      "id": "R6",
+      "text": "Notify providers in-app and by email when a status changes.",
+      "type": "functional",
+      "ambiguity": 0.3,
+      "sources": []
+    },
+    {
+      "id": "R7",
+      "text": "Attach additional documentation when the payer requests more information.",
+      "type": "functional",
+      "ambiguity": 0.5,
+      "sources": []
+    },
+    {
+      "id": "R8",
+      "text": "Write an audit event for every PHI access and status change.",
+      "type": "compliance",
+      "ambiguity": 0.1,
+      "sources": []
+    },
+    {
+      "id": "R9",
+      "text": "Alert before CMS-0057-F decision deadlines (72 h expedited, 7 days standard).",
+      "type": "compliance",
+      "ambiguity": 0.2,
+      "sources": []
+    },
+    {
+      "id": "R10",
+      "text": "Retry payer timeouts idempotently without duplicate submissions.",
+      "type": "non-functional",
+      "ambiguity": 0.2,
+      "sources": []
+    },
+    {
+      "id": "R11",
+      "text": "Only the patient's care team can view a PA request.",
+      "type": "non-functional",
+      "ambiguity": 0.25,
+      "sources": []
+    },
+    {
+      "id": "R12",
+      "text": "Status API p95 under 300 ms at 200 requests per second.",
+      "type": "non-functional",
+      "ambiguity": 0.1,
+      "sources": []
+    },
+    {
+      "id": "R13",
+      "text": "Portal screens meet WCAG 2.1 AA.",
+      "type": "non-functional",
+      "ambiguity": 0.1,
+      "sources": []
+    },
+    {
+      "id": "R14",
+      "text": "Show denial reason codes with plain-language explanations.",
+      "type": "functional",
+      "ambiguity": 0.3,
+      "sources": []
+    }
+  ],
+  "questions": [
+    {
+      "q": "Which clearinghouse handles X12 278 for non-FHIR payers?",
+      "proposed": "Use the existing clearinghouse contract; no new vendor.",
+      "reqs": [
+        "R3"
+      ],
+      "sources": []
+    },
+    {
+      "q": "Is polling acceptable, or must status use FHIR Subscriptions?",
+      "proposed": "Poll every 15 minutes now; add Subscriptions when payers support them.",
+      "reqs": [
+        "R4"
+      ],
+      "sources": []
+    },
+    {
+      "q": "Which document types can providers attach?",
+      "proposed": "PDF and images up to 20 MB, sent as DocumentReference.",
+      "reqs": [
+        "R7"
+      ],
+      "sources": []
+    },
+    {
+      "q": "Do email notifications include patient details?",
+      "proposed": "No PHI in email; link back to the portal.",
+      "reqs": [
+        "R6"
+      ],
+      "sources": []
+    }
+  ],
+  "success": [
+    "12 of 12 synthetic PA cases reach a final status on both FHIR and X12 paths",
+    "Status visible in the portal within 60 s of a payer update",
+    "Deadline alerts fire 12 h before CMS-0057-F limits",
+    "Every PHI access writes an audit event",
+    "Zero high or critical security findings at release",
+    "All 14 requirements trace to passing tests"
+  ],
+  "nodes": [
+    {
+      "id": "D1",
+      "type": "domain_model",
+      "name": "FHIR Domain Modeler",
+      "size": "M",
+      "risk": "med",
+      "deps": [],
+      "reqs": [
+        "R1",
+        "R4",
+        "R14"
+      ],
+      "inputs": [
+        "Da Vinci PAS implementation guide",
+        "Portal data model"
+      ],
+      "outputs": [
+        "Claim, ClaimResponse and Task profiles",
+        "Mapping to portal entities"
+      ],
+      "checks": [
+        "FHIR validator: 0 errors on 12 sample bundles"
+      ],
+      "done": "100% of PAS must-support elements mapped and validated.",
+      "task": "Map PA requests and responses to Da Vinci PAS Claim, ClaimResponse and Task profiles, and to the portal's own entities.",
+      "sources": []
+    },
+    {
+      "id": "D2",
+      "type": "architecture",
+      "name": "Solution Architect",
+      "size": "M",
+      "risk": "high",
+      "deps": [
+        "D1"
+      ],
+      "reqs": [
+        "R2",
+        "R3",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "inputs": [
+        "FHIR mappings",
+        "Non-functional requirements"
+      ],
+      "outputs": [
+        "ADRs: polling, X12 fallback, audit storage",
+        "OpenAPI contracts",
+        "STRIDE threat model"
+      ],
+      "checks": [
+        "Contract lint passes",
+        "Threat model covers PHI flows"
+      ],
+      "done": "Contracts compile into server and client stubs.",
+      "task": "Decide polling vs subscriptions, X12 fallback routing and audit storage; publish API contracts and a threat model for PHI flows.",
+      "sources": []
+    },
+    {
+      "id": "B1",
+      "type": "data_migration",
+      "name": "PA Status & Audit Schema",
+      "size": "M",
+      "risk": "high",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R8"
+      ],
+      "inputs": [
+        "Frozen contracts",
+        "Audit retention rules"
+      ],
+      "outputs": [
+        "PA status and audit tables",
+        "Migrations with rollback"
+      ],
+      "checks": [
+        "Up and down migration on a production-shaped snapshot"
+      ],
+      "done": "Zero-downtime migration rehearsed end to end.",
+      "task": "Add PA status and audit tables with reversible migrations, rehearsed on a production-shaped snapshot.",
+      "sources": []
+    },
+    {
+      "id": "B2",
+      "type": "integration",
+      "name": "Payer Integration Builder",
+      "size": "L",
+      "risk": "high",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R1",
+        "R2",
+        "R3",
+        "R10"
+      ],
+      "inputs": [
+        "Payer sandbox credentials",
+        "X12 278 companion guide"
+      ],
+      "outputs": [
+        "PAS $submit and $inquire client",
+        "X12 278 fallback adapter"
+      ],
+      "checks": [
+        "Contract tests against 2 payer sandboxes",
+        "Timeout and partial-failure chaos tests"
+      ],
+      "done": "12 of 12 synthetic cases reach a final status on both paths.",
+      "task": "Build the PAS $submit/$inquire client and the X12 278 fallback adapter with idempotent retries for payer timeouts.",
+      "sources": []
+    },
+    {
+      "id": "B3",
+      "type": "backend",
+      "name": "PA Status Service",
+      "size": "L",
+      "risk": "med",
+      "deps": [
+        "B1"
+      ],
+      "reqs": [
+        "R4",
+        "R8",
+        "R11",
+        "R12"
+      ],
+      "inputs": [
+        "Frozen contracts",
+        "Approved schema"
+      ],
+      "outputs": [
+        "Status service and polling scheduler",
+        "Audit event stream"
+      ],
+      "checks": [
+        "85% branch coverage",
+        "Load test: 200 rps, p95 under 300 ms"
+      ],
+      "done": "Service passes contract and load tests in staging.",
+      "task": "Build the status service and polling scheduler, enforce care-team access, and emit an audit event for every PHI read.",
+      "sources": []
+    },
+    {
+      "id": "B4",
+      "type": "ui",
+      "name": "Portal Tracker UI",
+      "size": "L",
+      "risk": "med",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R5",
+        "R7",
+        "R13",
+        "R14"
+      ],
+      "inputs": [
+        "Design system",
+        "Acceptance scenarios"
+      ],
+      "outputs": [
+        "Tracker screens and filters",
+        "Attachment flow"
+      ],
+      "checks": [
+        "Playwright end-to-end for 9 scenarios",
+        "axe scan: 0 serious issues"
+      ],
+      "done": "All UI scenarios green on the contract mock.",
+      "task": "Build the tracker screens, filters, denial-reason display and attachment flow on the design system.",
+      "sources": []
+    },
+    {
+      "id": "B5",
+      "type": "workflow",
+      "name": "Deadline & Notification Rules",
+      "size": "M",
+      "risk": "med",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R6",
+        "R9"
+      ],
+      "inputs": [
+        "CMS-0057-F timeframes",
+        "Notification preferences"
+      ],
+      "outputs": [
+        "Deadline timers",
+        "Notification rules"
+      ],
+      "checks": [
+        "Decision-table tests for expedited and standard paths"
+      ],
+      "done": "Alerts fire 12 h before each deadline in simulation.",
+      "task": "Encode CMS-0057-F deadline timers and status-change notification rules, with no PHI in emails.",
+      "sources": []
+    }
+  ]
+}

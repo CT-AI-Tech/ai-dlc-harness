@@ -1,0 +1,9 @@
+harness_path: "harness"
+harness_repo_url: "https://github.com/CT-AI-Tech/ai-dlc-harness.git"
+vertical: "medical-devices"
+block_on_binding: true
+enabled_phases:
+  constitution: true
+  development: true
+  review: true
+evidence_dir: ".specify/compliance"

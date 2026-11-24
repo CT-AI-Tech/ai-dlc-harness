@@ -82,6 +82,12 @@ Same as Speckit: open only the matched `path` values — typically 1-4 files.
 
 ## Step 6 — Record evidence
 
+`<feature-or-project-slug>` must be a stable identifier derived once per feature and
+reused for every later check — never re-derived fresh from the feature's title each run
+(two runs picking two different title-derived slugs silently splits one feature's
+evidence across both folders). Prefer an existing stable id already recorded for this
+feature (an epic/story code, a branch name) over inventing a new slug.
+
 Same evidence shape as Speckit, written to
 `<evidence_dir>/<feature-or-project-slug>/guardrails-applied.md` (default
 `evidence_dir` for this adapter: `_bmad-output/compliance`, matching BMAD's own

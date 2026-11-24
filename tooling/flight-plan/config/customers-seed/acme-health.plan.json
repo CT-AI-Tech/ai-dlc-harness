@@ -1,0 +1,431 @@
+{
+  "epic": {
+    "code": "ACME-PA",
+    "title": "Prior Authorization Status Tracker",
+    "summary": "PA submission and tracking in the Acme provider portal on Azure, with X12 routed through Availity.",
+    "approach": "Model PAS resources against Epic FHIR R4, then freeze OpenAPI contracts behind API Management. Status polling runs as Azure Functions publishing to Service Bus (ADR-012), so the status service, notifications and audit subscribe instead of polling. X12 goes through Availity per integration standards, which removes the clearinghouse question."
+  },
+  "brief": "Providers need to see where each prior authorization stands without calling the payer. Submit PA requests from the portal using FHIR PAS, track status live, fall back to X12 278 for payers without FHIR, and keep an audit trail that meets HIPAA and CMS-0057-F decision timelines.",
+  "flags": {
+    "phi": true,
+    "regulations": [
+      "HIPAA",
+      "CMS-0057-F",
+      "SEC-07"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Submit a PA request from the portal as a FHIR PAS Claim bundle ($submit).",
+      "type": "functional",
+      "ambiguity": 0.1,
+      "sources": []
+    },
+    {
+      "id": "R2",
+      "text": "Route each request to FHIR PAS or X12 278 based on payer capability.",
+      "type": "integration",
+      "ambiguity": 0.3,
+      "sources": [
+        "DOC-1"
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Send X12 278 requests through Availity for payers without FHIR PAS.",
+      "type": "integration",
+      "ambiguity": 0.1,
+      "sources": [
+        "DOC-1",
+        "P:systems"
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Track status via timer-triggered polling that publishes status events to Service Bus.",
+      "type": "functional",
+      "ambiguity": 0.2,
+      "sources": [
+        "DOC-2"
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Status tracker screen with filters by payer, status, provider and due date.",
+      "type": "functional",
+      "ambiguity": 0.15,
+      "sources": []
+    },
+    {
+      "id": "R6",
+      "text": "Notify providers in-app and by email when a status changes.",
+      "type": "functional",
+      "ambiguity": 0.3,
+      "sources": [
+        "P:standards"
+      ]
+    },
+    {
+      "id": "R7",
+      "text": "Attach additional documentation when the payer requests more information.",
+      "type": "functional",
+      "ambiguity": 0.5,
+      "sources": []
+    },
+    {
+      "id": "R8",
+      "text": "Write an audit event for every PHI access and status change.",
+      "type": "compliance",
+      "ambiguity": 0.1,
+      "sources": [
+        "P:nfr",
+        "P:regulations"
+      ]
+    },
+    {
+      "id": "R9",
+      "text": "Alert before CMS-0057-F decision deadlines (72 h expedited, 7 days standard).",
+      "type": "compliance",
+      "ambiguity": 0.2,
+      "sources": []
+    },
+    {
+      "id": "R10",
+      "text": "Retry payer timeouts idempotently without duplicate submissions.",
+      "type": "non-functional",
+      "ambiguity": 0.2,
+      "sources": [
+        "DOC-1"
+      ]
+    },
+    {
+      "id": "R11",
+      "text": "Only the patient's care team can view a PA request.",
+      "type": "non-functional",
+      "ambiguity": 0.25,
+      "sources": []
+    },
+    {
+      "id": "R12",
+      "text": "Status API p95 under 250 ms.",
+      "type": "non-functional",
+      "ambiguity": 0.1,
+      "sources": [
+        "P:nfr"
+      ]
+    },
+    {
+      "id": "R13",
+      "text": "Portal screens meet WCAG 2.1 AA.",
+      "type": "non-functional",
+      "ambiguity": 0.1,
+      "sources": [
+        "P:standards"
+      ]
+    },
+    {
+      "id": "R14",
+      "text": "Show denial reason codes with plain-language explanations.",
+      "type": "functional",
+      "ambiguity": 0.3,
+      "sources": []
+    }
+  ],
+  "questions": [
+    {
+      "q": "Which document types can providers attach?",
+      "proposed": "PDF and images up to 20 MB, sent as DocumentReference.",
+      "reqs": [
+        "R7"
+      ],
+      "sources": []
+    },
+    {
+      "q": "Can Availity sandbox access start now, given the 10-day lead time?",
+      "proposed": "Request it at scope sign-off so integration is not blocked.",
+      "reqs": [
+        "R3"
+      ],
+      "sources": [
+        "DOC-1"
+      ]
+    }
+  ],
+  "success": [
+    "12 of 12 synthetic PA cases reach a final status via both PAS and Availity",
+    "Status visible within 60 s of a payer update",
+    "Status API p95 under 250 ms",
+    "Every PHI access writes an audit event retained 7 years",
+    "Zero high or critical findings and SEC-07 sign-off",
+    "All 14 requirements trace to passing tests"
+  ],
+  "nodes": [
+    {
+      "id": "D1",
+      "type": "domain_model",
+      "name": "PAS ↔ Epic FHIR Modeler",
+      "size": "M",
+      "risk": "med",
+      "deps": [],
+      "reqs": [
+        "R1",
+        "R4",
+        "R14"
+      ],
+      "task": "Map PA requests to Da Vinci PAS profiles and to Epic FHIR R4 resources the portal already reads.",
+      "inputs": [
+        "Da Vinci PAS guide",
+        "Epic on FHIR R4 resource list"
+      ],
+      "outputs": [
+        "PAS profile mappings",
+        "Epic ↔ PAS mapping table"
+      ],
+      "checks": [
+        "FHIR validator: 0 errors on 12 sample bundles"
+      ],
+      "done": "All PAS must-support elements mapped to Epic sources.",
+      "sources": [
+        "P:systems"
+      ]
+    },
+    {
+      "id": "D2",
+      "type": "architecture",
+      "name": "Azure Solution Architect",
+      "size": "M",
+      "risk": "high",
+      "deps": [
+        "D1"
+      ],
+      "reqs": [
+        "R2",
+        "R3",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "task": "Design the PA flow on Azure: APIM front door, Service Bus topics per ADR-012, Availity for X12, and the threat model for SEC-07.",
+      "inputs": [
+        "ADR-012",
+        "Integration standards v3"
+      ],
+      "outputs": [
+        "ADRs and OpenAPI contracts",
+        "Service Bus topic design",
+        "STRIDE threat model"
+      ],
+      "checks": [
+        "Contracts pass APIM policy lint",
+        "Threat model covers PHI flows"
+      ],
+      "done": "Contracts compile and topic design is accepted.",
+      "sources": [
+        "DOC-2",
+        "DOC-1",
+        "P:cloud"
+      ]
+    },
+    {
+      "id": "B1",
+      "type": "data_migration",
+      "name": "Azure SQL PA & Audit Schema",
+      "size": "M",
+      "risk": "high",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R8"
+      ],
+      "task": "Extend the existing Azure SQL database with PA status and 7-year audit tables; no new database.",
+      "inputs": [
+        "Frozen contracts",
+        "Retention policy"
+      ],
+      "outputs": [
+        "Tables and reversible migrations"
+      ],
+      "checks": [
+        "Up and down migration on a production-shaped snapshot"
+      ],
+      "done": "Zero-downtime migration rehearsed.",
+      "sources": [
+        "P:notes",
+        "P:nfr"
+      ]
+    },
+    {
+      "id": "B6",
+      "type": "infra",
+      "name": "Service Bus & Functions Setup",
+      "size": "M",
+      "risk": "med",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R4",
+        "R10"
+      ],
+      "task": "Provision Service Bus topics, dead-letter queues and the timer-triggered Functions app in Bicep.",
+      "inputs": [
+        "Topic design",
+        "Landing zone"
+      ],
+      "outputs": [
+        "Bicep modules",
+        "Dev and test environments"
+      ],
+      "checks": [
+        "Bicep what-if reviewed",
+        "Policy scan clean"
+      ],
+      "done": "Environments provision from code with DLQs in place.",
+      "sources": [
+        "P:cloud",
+        "DOC-2",
+        "DOC-1"
+      ]
+    },
+    {
+      "id": "B2",
+      "type": "integration",
+      "name": "Availity & PAS Integration",
+      "size": "L",
+      "risk": "high",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R1",
+        "R2",
+        "R3",
+        "R10"
+      ],
+      "task": "Build the PAS client behind APIM with mTLS and the X12 278 path through the Availity REST wrapper, with idempotency keys.",
+      "inputs": [
+        "Availity sandbox",
+        "Payer PAS sandboxes"
+      ],
+      "outputs": [
+        "PAS client",
+        "Availity 278 adapter"
+      ],
+      "checks": [
+        "Contract tests against Availity and 2 PAS sandboxes",
+        "Partial-failure tests with DLQ"
+      ],
+      "done": "12 of 12 synthetic cases reach a final status on both paths.",
+      "sources": [
+        "DOC-1",
+        "P:systems"
+      ]
+    },
+    {
+      "id": "B3",
+      "type": "backend",
+      "name": ".NET PA Status Service",
+      "size": "L",
+      "risk": "med",
+      "deps": [
+        "B1",
+        "B6"
+      ],
+      "reqs": [
+        "R4",
+        "R8",
+        "R11",
+        "R12"
+      ],
+      "task": "Build the .NET 8 status API and the polling Function that publishes status events; subscribers write audit records.",
+      "inputs": [
+        "Frozen contracts",
+        "Approved schema",
+        "Service Bus topics"
+      ],
+      "outputs": [
+        "Status API",
+        "Polling Function",
+        "Audit subscriber"
+      ],
+      "checks": [
+        "85% branch coverage",
+        "Load test: p95 under 250 ms"
+      ],
+      "done": "Service passes contract and load tests in staging.",
+      "sources": [
+        "P:techStack",
+        "DOC-2",
+        "P:standards"
+      ]
+    },
+    {
+      "id": "B4",
+      "type": "ui",
+      "name": "Angular Tracker UI",
+      "size": "L",
+      "risk": "med",
+      "deps": [
+        "D2"
+      ],
+      "reqs": [
+        "R5",
+        "R7",
+        "R13",
+        "R14"
+      ],
+      "task": "Build the tracker and attachment flow in Angular 17 on the Acme design system.",
+      "inputs": [
+        "Acme design system",
+        "Acceptance scenarios"
+      ],
+      "outputs": [
+        "Tracker screens",
+        "Attachment flow"
+      ],
+      "checks": [
+        "Playwright end-to-end",
+        "axe: 0 serious issues"
+      ],
+      "done": "All UI scenarios green on the contract mock.",
+      "sources": [
+        "P:techStack",
+        "P:standards"
+      ]
+    },
+    {
+      "id": "B5",
+      "type": "workflow",
+      "name": "Deadline & Notification Rules",
+      "size": "M",
+      "risk": "med",
+      "deps": [
+        "B6"
+      ],
+      "reqs": [
+        "R6",
+        "R9"
+      ],
+      "task": "Subscribe to status events to drive CMS-0057-F deadline timers and notifications that carry no PHI.",
+      "inputs": [
+        "CMS-0057-F timeframes",
+        "Status topic"
+      ],
+      "outputs": [
+        "Deadline timers",
+        "Notification rules"
+      ],
+      "checks": [
+        "Decision-table tests for expedited and standard paths"
+      ],
+      "done": "Alerts fire 12 h before each deadline in simulation.",
+      "sources": [
+        "P:regulations",
+        "P:standards",
+        "DOC-2"
+      ]
+    }
+  ]
+}

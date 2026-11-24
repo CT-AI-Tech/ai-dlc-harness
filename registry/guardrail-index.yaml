@@ -8,7 +8,7 @@
 
 version: 1
 generated_from: "guardrail frontmatter under verticals/ and cross-cutting/"
-last_generated: 2026-11-02
+last_generated: 2026-11-24
 
 guardrails:
   - id: GR-MD-CLASS-001
@@ -102,12 +102,12 @@ guardrails:
     path: verticals/ehr/constitution/information-blocking.md
 
   - id: GR-EHR-SMART-001
-    title: Third-party apps consuming EHR data must use SMART App Launch v2.0.0 with minimum-necessary scopes
+    title: Third-party apps consuming EHR data must use SMART App Launch v2.x with minimum-necessary scopes
     vertical: ehr
     lifecycle_phase: development
     binding_tier: binding
     applicability_tags: [ehr-interoperability-app, smart-on-fhir, third-party-app]
-    summary: Integrations must use SMART App Launch v2.0.0 (not deprecated v1.0.0) and request only the FHIR scopes the feature actually needs.
+    summary: Integrations must use SMART App Launch v2.0.0 or later (not deprecated v1.0.0) and request only the FHIR scopes the feature actually needs.
     path: verticals/ehr/development/smart-on-fhir-authorization.md
 
   - id: GR-EHR-USCDI-001
@@ -127,3 +127,73 @@ guardrails:
     applicability_tags: [ehr-platform-feature, ehr-interoperability-app, certified-health-it]
     summary: Changes to certified API endpoints or US Core mappings need conformance test evidence (e.g. Inferno), checked at review time.
     path: verticals/ehr/review/interoperability-conformance-testing.md
+
+  - id: GR-ENG-COMMENT-001
+    title: Code comments must not justify a workaround instead of fixing or flagging it
+    vertical: cross-cutting
+    lifecycle_phase: development
+    binding_tier: advisory
+    category: engineering
+    applicability_tags: [code-generation, code-review, comments, agent-behavior]
+    summary: A comment explaining why a shortcut was "necessary" rationalizes not doing the right thing and gets copied by the next agent as if it were sanctioned.
+    path: cross-cutting/engineering-standards/comment-escape-hatch.md
+
+  - id: GR-ENG-NUANCE-001
+    title: Patterns that require deep framework-specific nuance must be avoided or wrapped, not used ad hoc
+    vertical: cross-cutting
+    lifecycle_phase: development
+    binding_tier: advisory
+    category: engineering
+    applicability_tags: [code-generation, architecture, framework-usage]
+    summary: Agents reach for high-nuance APIs (manual effects, raw timers) readily but misuse them reliably — ban or wrap them instead.
+    path: cross-cutting/engineering-standards/high-nuance-patterns.md
+
+  - id: GR-ENG-ARCHBOUNDARY-001
+    title: Declared architecture/module boundaries must be enforced by tooling, not left to convention
+    vertical: cross-cutting
+    lifecycle_phase: development
+    binding_tier: binding
+    category: engineering
+    applicability_tags: [architecture, code-generation, module-boundaries, static-analysis]
+    summary: A boundary that exists only as a naming convention gets crossed the moment it's inconvenient — enforce it with a dependency-graph or import-boundary rule.
+    path: cross-cutting/engineering-standards/architecture-boundaries.md
+
+  - id: GR-ENG-REPEATFIX-001
+    title: A correction given more than once should become an enforced check, not another line of guidance
+    vertical: cross-cutting
+    lifecycle_phase: review
+    binding_tier: advisory
+    category: engineering
+    applicability_tags: [code-review, process, lint-rules, agent-behavior]
+    summary: A recurring correction is evidence prose guidance isn't working — convert it into a lint rule, type, or test instead of restating it.
+    path: cross-cutting/engineering-standards/repeated-corrections-to-checks.md
+
+  - id: GR-ENG-TESTHONESTY-001
+    title: A test-passing claim must be backed by an observed test execution, never by code review alone
+    vertical: cross-cutting
+    lifecycle_phase: review
+    binding_tier: binding
+    category: engineering
+    applicability_tags: [testing, verification, code-review, agent-behavior]
+    summary: "\"Looks correct on read\" and \"a test confirmed it\" are different claims — never report the former as the latter."
+    path: cross-cutting/engineering-standards/test-verification-honesty.md
+
+  - id: GR-ENG-SECRETS-001
+    title: Generated code must never contain hardcoded secrets, keys, or credentials
+    vertical: cross-cutting
+    lifecycle_phase: development
+    binding_tier: binding
+    category: engineering
+    applicability_tags: [security, secrets-management, code-generation, credentials]
+    summary: API keys, passwords, tokens, and connection strings must always come from a real secrets-management mechanism, never literal values in code.
+    path: cross-cutting/engineering-standards/no-hardcoded-secrets.md
+
+  - id: GR-ENG-DEPRECATED-001
+    title: New code must not copy a deprecated or legacy pattern just because it's already in the codebase
+    vertical: cross-cutting
+    lifecycle_phase: development
+    binding_tier: advisory
+    category: engineering
+    applicability_tags: [code-generation, technical-debt, legacy-code, architecture]
+    summary: A deprecated pattern still present in the codebase looks like the established convention to an agent unless it's explicitly marked legacy.
+    path: cross-cutting/engineering-standards/deprecated-pattern-propagation.md

@@ -63,6 +63,11 @@ Same as every other adapter — typically 1-4 files, never the whole vertical.
 
 ## Step 6 — Record evidence
 
+`<feature-or-project-slug>` must be a stable identifier derived once per feature and
+reused for every later check — never re-derived fresh from the feature's title each run
+(two runs picking two different title-derived slugs silently splits one feature's
+evidence across both folders).
+
 Append to `<evidence_dir>/<feature-or-project-slug>/guardrails-applied.md` (default
 `evidence_dir`: `.ai-dlc-compliance/` at the project root — pick something that won't
 collide with an existing tool's own convention).
