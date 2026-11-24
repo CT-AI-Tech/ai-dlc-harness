@@ -73,6 +73,9 @@ ai-dlc-harness/
   cross-cutting/
     hipaa/
     general/
+    engineering-standards/      <- coding standards / agent-behavior patterns
+                                   (category: engineering — not regulatory; see
+                                   governance/CONTENT-OWNERS.md)
   governance/                   <- ownership, review cadence, decision log
   agent-interface/              <- how agents/skills are meant to consume all of this
   integrations/
@@ -80,7 +83,21 @@ ai-dlc-harness/
     bmad/                       <- how this plugs into BMAD-METHOD
     kiro/                       <- how this plugs into Amazon Kiro
     generic/                    <- manual-trigger adapter for everyone else
+  release-speckit/              <- flattened, zip-ready Speckit extension release
+  release-bmad/                 <- native BMAD module release
+  tooling/                      <- one platform: the registry above, plus the tools
+                                    built on top of it (optional, additive — the
+                                    registry/integrations above work with none of this)
+    vscode-journey/              <- VS Code extension: visual, persona-based journey
+                                    view over a project using this harness
+    flight-plan/                 <- design-planning tool: compiles a requirement into
+                                    a priced, simulated build plan the journey view
+                                    can render as its design graph
 ```
+
+An architect can use `tooling/flight-plan/` or not — the harness and its framework
+integrations above don't depend on it. See `tooling/vscode-journey/README.md` for
+how the pieces connect.
 
 ## Adding a new vertical
 

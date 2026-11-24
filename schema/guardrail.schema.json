@@ -65,6 +65,11 @@
       "type": "string",
       "maxLength": 280,
       "description": "One or two sentences. This is what gets shown in INDEX.md and the registry — write it so an agent can decide relevance WITHOUT opening the file."
+    },
+    "category": {
+      "type": "string",
+      "enum": ["regulatory", "engineering"],
+      "description": "Optional. Distinguishes regulatory/compliance guardrails (the pilot's original content — the default when this field is absent, for backward compatibility) from engineering/coding-standard guardrails (cross-cutting/engineering-standards/) — architecture, testing, code hygiene. Visual tooling (e.g. the Dev persona view) uses this to show engineering standards as their own section, separate from compliance findings, since that's the material a dev/lead reviews day to day."
     }
   }
 }

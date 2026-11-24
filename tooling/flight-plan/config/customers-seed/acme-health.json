@@ -1,0 +1,89 @@
+{
+  "id": "acme-health",
+  "name": "Acme Health (sample)",
+  "owner": "Delivery lead",
+  "reviewedAt": "2026-10-01",
+  "profile": {
+    "context": "Fictional regional health system used for demos. Runs a provider portal for 2,400 clinicians across 14 hospitals.",
+    "techStack": ".NET 8 Web APIs, Angular 17 front end on the Acme design system, Azure SQL, Redis cache.",
+    "cloud": "Azure only (Central India primary, South India DR). Azure Service Bus for async messaging, Entra ID for identity, Key Vault for secrets. Bicep for IaC.",
+    "systems": "Epic EHR (FHIR R4 APIs via Epic on FHIR). Availity is the contracted clearinghouse for all X12 traffic. 3 payers expose Da Vinci PAS today.",
+    "standards": "OpenAPI-first contracts. 85% branch coverage minimum. WCAG 2.1 AA. No PHI in email, SMS or logs. All external APIs go through Azure API Management.",
+    "nfr": "APIs p95 under 250 ms. 99.9% availability. Audit logs retained 7 years.",
+    "regulations": "HIPAA, CMS-0057-F, internal policy SEC-07 (security architecture review for any new external integration).",
+    "team": "Change Advisory Board approves every production release (Thursday windows). Security architecture review board meets twice a week.",
+    "notes": "Prefers buying over building for clearinghouse connectivity. Avoid new databases; extend Azure SQL."
+  },
+  "documents": [
+    {
+      "id": "DOC-1",
+      "title": "Integration standards v3",
+      "content": "All X12 transactions (270/271, 276/277, 278) route through Availity using the Availity REST wrapper. Direct payer X12 connections are not allowed.\nFHIR calls to payers must go through Azure API Management with mTLS.\nEvery integration needs idempotency keys and a dead-letter queue on Azure Service Bus.\nSandbox access to Availity takes 10 business days to provision."
+    },
+    {
+      "id": "DOC-2",
+      "title": "ADR-012: Async messaging on Azure Service Bus",
+      "content": "Decision: All long-running or polling workloads publish events to Azure Service Bus topics. Services must not poll external systems from web request threads. Polling jobs run as Azure Functions on a timer trigger and publish status-change events.\nConsequences: New services subscribe to topics; status changes fan out to notification and audit consumers."
+    }
+  ],
+  "rules": {
+    "requiredGates": [
+      {
+        "id": "sec-arch",
+        "name": "Security architecture review",
+        "reviewer": "Security architect",
+        "mins": 40,
+        "risk": "high",
+        "placement": "after_type",
+        "agentType": "integration",
+        "onlyIfPhi": false,
+        "sees": [
+          "Data-flow diagram for the integration",
+          "Threat model",
+          "APIM and mTLS configuration"
+        ],
+        "approve": "Integration meets policy SEC-07.",
+        "why": "Acme policy SEC-07 requires it for every new external integration."
+      },
+      {
+        "id": "cab",
+        "name": "Change Advisory Board",
+        "reviewer": "CAB",
+        "mins": 30,
+        "risk": "high",
+        "placement": "before_release",
+        "agentType": "",
+        "onlyIfPhi": false,
+        "sees": [
+          "Release plan and rollback runbook",
+          "Evidence pack",
+          "Release window"
+        ],
+        "approve": "Release booked into a Thursday window.",
+        "why": "Every Acme production release needs CAB approval."
+      }
+    ],
+    "estimatorOverrides": {
+      "agents": {
+        "integration": {
+          "tok": 5.2,
+          "hrs": 9
+        },
+        "ui": {
+          "hrs": 6.5
+        }
+      },
+      "tiers": [
+        {
+          "price": 0.9
+        },
+        {
+          "price": 2.6
+        },
+        {
+          "price": 8
+        }
+      ]
+    }
+  }
+}

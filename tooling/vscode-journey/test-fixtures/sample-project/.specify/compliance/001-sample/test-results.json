@@ -1,0 +1,35 @@
+[
+  {
+    "user_story": "User Story 1 - Submit and track a prior authorization",
+    "scenario_index": 1,
+    "scenario_text": "Given a provider submits a PA request, When the payer supports FHIR PAS, Then the request is sent as a $submit bundle.",
+    "status": "passed",
+    "note": "Contract test suite run against the payer sandbox; all cases green.",
+    "timestamp": "2026-11-22T12:00:00Z",
+    "evidence_refs": ["_bmad-output/test-runs/pa-submit-contract-2026-11-22.log"]
+  },
+  {
+    "user_story": "User Story 1 - Submit and track a prior authorization",
+    "scenario_index": 2,
+    "scenario_text": "Given the payer has no FHIR support, When a request is submitted, Then it is routed over X12 278 instead.",
+    "status": "not_verified",
+    "note": "Implementation reviewed and appears to satisfy this; no automated test run observed for the X12 fallback path.",
+    "timestamp": "2026-11-22T12:00:00Z"
+  },
+  {
+    "user_story": "User Story 2 - Status tracker and notifications",
+    "scenario_index": 1,
+    "scenario_text": "Given a status change arrives from the payer, When it is processed, Then the provider sees it in the tracker within 60 seconds.",
+    "status": "failed",
+    "note": "Contract test run; tracker update observed at ~140s under load, exceeds the 60s target.",
+    "timestamp": "2026-11-22T12:00:00Z"
+  },
+  {
+    "user_story": "User Story 2 - Status tracker and notifications",
+    "scenario_index": 2,
+    "scenario_text": "Given a denial reason code is received, When displayed to the provider, Then it shows a plain-language explanation, not just the code.",
+    "status": "not_implemented",
+    "note": "Denial reason mapping table does not exist yet in this diff.",
+    "timestamp": "2026-11-22T12:00:00Z"
+  }
+]

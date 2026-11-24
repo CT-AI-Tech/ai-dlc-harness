@@ -1,0 +1,721 @@
+{
+  "version": "0.1.0",
+  "note": "Baseline tokens (millions) and hours are for size M. Replace with your own delivery actuals to calibrate.",
+  "agents": {
+    "intent": {
+      "name": "Intent Compiler",
+      "role": "Requirements analyst agent",
+      "phase": "Intent",
+      "tier": 2,
+      "tok": 0.4,
+      "hrs": 0.6,
+      "risk": "med",
+      "inputs": [
+        "Epic brief",
+        "Codebase index",
+        "Domain standards"
+      ],
+      "outputs": [
+        "Atomic requirements with ambiguity scores",
+        "Clarifying questions with proposed answers"
+      ],
+      "checks": [
+        "Every requirement traces to the brief",
+        "Nothing above 0.35 ambiguity ships without a question"
+      ],
+      "done": "Every requirement has an owning node and a test stub.",
+      "does": "Reads the brief and source material, splits it into atomic testable requirements, scores ambiguity and drafts the questions for scope sign-off.",
+      "tools": [
+        "Requirement parser",
+        "Codebase index",
+        "Standards library"
+      ]
+    },
+    "test_strategy": {
+      "name": "Test Strategist",
+      "role": "QA design agent",
+      "phase": "Design",
+      "tier": 1,
+      "tok": 0.6,
+      "hrs": 0.9,
+      "risk": "low",
+      "inputs": [
+        "Signed-off requirements",
+        "Existing test suites"
+      ],
+      "outputs": [
+        "Gherkin acceptance scenarios",
+        "Contract test stubs",
+        "Synthetic test data (no PHI)"
+      ],
+      "checks": [
+        "Every requirement covered by a scenario",
+        "Mutation check that scenarios can fail"
+      ],
+      "done": "Coverage matrix is complete before code is written.",
+      "does": "Turns every requirement into acceptance scenarios and contract tests before any code exists, and generates synthetic test data.",
+      "tools": [
+        "Gherkin generator",
+        "Coverage matrix",
+        "Synthetic data generator"
+      ]
+    },
+    "domain_model": {
+      "name": "Domain Modeler",
+      "role": "Domain and standards agent",
+      "phase": "Design",
+      "tier": 1,
+      "tok": 0.8,
+      "hrs": 1.1,
+      "risk": "med",
+      "inputs": [
+        "Requirements",
+        "Standards guides",
+        "Current data model"
+      ],
+      "outputs": [
+        "Entity and standards mappings",
+        "Data dictionary"
+      ],
+      "checks": [
+        "Validator passes on sample payloads"
+      ],
+      "done": "All must-support elements mapped and validated.",
+      "does": "Maps the domain to standards and the existing data model: entities, profiles, value sets and data dictionaries.",
+      "tools": [
+        "FHIR validator",
+        "Schema reader"
+      ]
+    },
+    "architecture": {
+      "name": "Solution Architect",
+      "role": "Architecture agent",
+      "phase": "Design",
+      "tier": 2,
+      "tok": 1,
+      "hrs": 1.5,
+      "risk": "high",
+      "gate": "arch",
+      "inputs": [
+        "Requirements",
+        "Domain model",
+        "Platform standards"
+      ],
+      "outputs": [
+        "ADRs",
+        "API contracts",
+        "Threat model"
+      ],
+      "checks": [
+        "Contract lint passes",
+        "Every requirement mapped to a component"
+      ],
+      "done": "Contracts compile into server and client stubs.",
+      "does": "Designs the solution: records decisions as ADRs, writes API contracts and sequence flows, and builds the threat model later nodes must honour.",
+      "tools": [
+        "OpenAPI linter",
+        "Diagram generator",
+        "Threat modelling templates"
+      ]
+    },
+    "data_migration": {
+      "name": "Data & Migration",
+      "role": "Database agent",
+      "phase": "Build",
+      "tier": 1,
+      "tok": 1.2,
+      "hrs": 1.4,
+      "risk": "high",
+      "gate": "dba",
+      "inputs": [
+        "Frozen contracts",
+        "Current schema"
+      ],
+      "outputs": [
+        "Schema changes",
+        "Migrations with rollback"
+      ],
+      "checks": [
+        "Up and down migration on a production-shaped snapshot"
+      ],
+      "done": "Zero-downtime migration rehearsed.",
+      "does": "Writes schema changes and reversible migrations, rehearses them on production-shaped data, and seeds reference data.",
+      "tools": [
+        "Migration framework",
+        "Snapshot database",
+        "Row-count checks"
+      ]
+    },
+    "backend": {
+      "name": "Backend Builder",
+      "role": "Backend agent",
+      "phase": "Build",
+      "tier": 1,
+      "tok": 5,
+      "hrs": 8,
+      "risk": "med",
+      "inputs": [
+        "Frozen contracts",
+        "Approved schema"
+      ],
+      "outputs": [
+        "Services and APIs"
+      ],
+      "checks": [
+        "Unit tests at 85% branch coverage",
+        "Contract tests"
+      ],
+      "done": "Service passes contract tests in staging.",
+      "does": "Implements services, APIs, jobs and business logic against the frozen contracts, with unit and contract tests.",
+      "tools": [
+        "Repo access",
+        "Unit test runner",
+        "Contract test harness"
+      ]
+    },
+    "integration": {
+      "name": "Integration Builder",
+      "role": "Integration agent",
+      "phase": "Build",
+      "tier": 2,
+      "tok": 4.5,
+      "hrs": 7,
+      "risk": "high",
+      "inputs": [
+        "Frozen contracts",
+        "Partner sandbox access"
+      ],
+      "outputs": [
+        "Connectors",
+        "Retry and idempotency layer"
+      ],
+      "checks": [
+        "Contract tests against sandboxes",
+        "Timeout and partial-failure tests"
+      ],
+      "done": "All synthetic cases complete end to end.",
+      "does": "Builds connectors to external systems with retries, idempotency and failure handling, proven against partner sandboxes.",
+      "tools": [
+        "Sandbox credentials",
+        "HTTP and EDI clients",
+        "Chaos test harness"
+      ]
+    },
+    "ui": {
+      "name": "UI Builder",
+      "role": "Frontend agent",
+      "phase": "Build",
+      "tier": 1,
+      "tok": 3.5,
+      "hrs": 5.5,
+      "risk": "med",
+      "gate": "ux",
+      "inputs": [
+        "Frozen contracts",
+        "Design system",
+        "Acceptance scenarios"
+      ],
+      "outputs": [
+        "Screens and flows"
+      ],
+      "checks": [
+        "Component tests",
+        "End-to-end tests",
+        "axe scan: 0 serious issues"
+      ],
+      "done": "All UI scenarios green on the contract mock.",
+      "does": "Builds screens and flows from the design system, wired to the contract mock, with accessibility and end-to-end tests.",
+      "tools": [
+        "Component library",
+        "Playwright",
+        "axe"
+      ]
+    },
+    "workflow": {
+      "name": "Workflow & Rules Builder",
+      "role": "Rules engine agent",
+      "phase": "Build",
+      "tier": 1,
+      "tok": 3,
+      "hrs": 5,
+      "risk": "med",
+      "inputs": [
+        "Business rules",
+        "Frozen contracts"
+      ],
+      "outputs": [
+        "Rules and state machine",
+        "Notifications"
+      ],
+      "checks": [
+        "Decision-table tests"
+      ],
+      "done": "Every rule has a passing positive and negative test.",
+      "does": "Encodes business rules, eligibility logic, state machines, timers and notifications as testable decision tables.",
+      "tools": [
+        "Rules engine",
+        "Decision-table tests",
+        "Scheduler"
+      ]
+    },
+    "ai_ml": {
+      "name": "AI Component Builder",
+      "role": "AI/ML agent",
+      "phase": "Build",
+      "tier": 2,
+      "tok": 4,
+      "hrs": 6,
+      "risk": "high",
+      "gate": "model",
+      "inputs": [
+        "Labeled samples",
+        "Prompt and model policy"
+      ],
+      "outputs": [
+        "Model or prompt pipeline",
+        "Eval suite"
+      ],
+      "checks": [
+        "Offline eval against golden set",
+        "Hallucination and PHI-leak checks"
+      ],
+      "done": "Eval scores meet the agreed threshold.",
+      "does": "Builds the AI component (prompts, models, pipelines) together with a golden-set eval suite and safety checks.",
+      "tools": [
+        "Model endpoint",
+        "Eval harness",
+        "PHI-leak detector"
+      ]
+    },
+    "infra": {
+      "name": "Infrastructure Builder",
+      "role": "Platform agent",
+      "phase": "Build",
+      "tier": 1,
+      "tok": 1.2,
+      "hrs": 2,
+      "risk": "med",
+      "inputs": [
+        "Architecture",
+        "Cloud standards"
+      ],
+      "outputs": [
+        "IaC modules",
+        "Environments"
+      ],
+      "checks": [
+        "IaC plan diff",
+        "Policy-as-code scan"
+      ],
+      "done": "Environments provision cleanly from code.",
+      "does": "Writes infrastructure as code for environments, networking, secrets and tenancy, checked against policy.",
+      "tools": [
+        "Terraform or Bicep",
+        "Policy-as-code scanner"
+      ]
+    },
+    "reporting": {
+      "name": "Reporting Builder",
+      "role": "Analytics agent",
+      "phase": "Build",
+      "tier": 1,
+      "tok": 2.2,
+      "hrs": 3.5,
+      "risk": "low",
+      "inputs": [
+        "Data model",
+        "Metric definitions"
+      ],
+      "outputs": [
+        "Dashboards and exports"
+      ],
+      "checks": [
+        "Metric reconciliation against source"
+      ],
+      "done": "Every metric reconciles to source data.",
+      "does": "Builds dashboards, metrics and exports, reconciling every figure to source data.",
+      "tools": [
+        "BI tool",
+        "SQL",
+        "Reconciliation checks"
+      ]
+    },
+    "test_runner": {
+      "name": "Test Runner & Fixer",
+      "role": "Verification agent",
+      "phase": "Verify",
+      "tier": 1,
+      "tok": 2.8,
+      "hrs": 4,
+      "risk": "med",
+      "inputs": [
+        "All build outputs",
+        "Acceptance scenarios"
+      ],
+      "outputs": [
+        "Green suite",
+        "Fix log per failure"
+      ],
+      "checks": [
+        "Full acceptance run",
+        "Fix loop capped at 4 cycles, then escalates"
+      ],
+      "done": "All scenarios pass twice in a row.",
+      "does": "Runs the full acceptance suite, diagnoses failures, fixes them in a capped loop and escalates what it cannot fix.",
+      "tools": [
+        "CI runner",
+        "Repo access",
+        "Flaky-test detector"
+      ]
+    },
+    "security": {
+      "name": "Security Scanner",
+      "role": "AppSec agent",
+      "phase": "Verify",
+      "tier": 0,
+      "tok": 0.5,
+      "hrs": 0.7,
+      "risk": "med",
+      "inputs": [
+        "Merged branch",
+        "Dependency manifest"
+      ],
+      "outputs": [
+        "SAST, dependency and secrets reports"
+      ],
+      "checks": [
+        "Semgrep and CodeQL rulesets",
+        "Log sampling for PHI patterns"
+      ],
+      "done": "Zero high or critical findings open.",
+      "does": "Scans code, dependencies, secrets and logs, and blocks release on high or critical findings.",
+      "tools": [
+        "Semgrep",
+        "CodeQL",
+        "Dependency scanner",
+        "Secrets scanner"
+      ]
+    },
+    "compliance": {
+      "name": "Compliance Checker",
+      "role": "Regulatory agent",
+      "phase": "Verify",
+      "tier": 1,
+      "tok": 0.6,
+      "hrs": 0.8,
+      "risk": "high",
+      "inputs": [
+        "Requirement trace",
+        "Audit design"
+      ],
+      "outputs": [
+        "Control checklist with evidence"
+      ],
+      "checks": [
+        "Every regulated control has evidence"
+      ],
+      "done": "All compliance controls have passing evidence.",
+      "does": "Checks each regulated control against evidence from the build and flags gaps before review.",
+      "tools": [
+        "Control library",
+        "Requirement trace"
+      ]
+    },
+    "performance": {
+      "name": "Performance Tester",
+      "role": "Load test agent",
+      "phase": "Verify",
+      "tier": 1,
+      "tok": 0.8,
+      "hrs": 1.5,
+      "risk": "med",
+      "inputs": [
+        "Staging build",
+        "Load profile"
+      ],
+      "outputs": [
+        "Load test report"
+      ],
+      "checks": [
+        "p95 latency and error rate under target"
+      ],
+      "done": "Load targets met at expected peak.",
+      "does": "Load-tests the staging build at expected peak and reports latency and error rates against targets.",
+      "tools": [
+        "k6 or JMeter",
+        "APM"
+      ]
+    },
+    "release": {
+      "name": "Release Agent",
+      "role": "DevOps agent",
+      "phase": "Ship",
+      "tier": 1,
+      "tok": 0.8,
+      "hrs": 1.2,
+      "risk": "med",
+      "inputs": [
+        "Approved build",
+        "IaC modules"
+      ],
+      "outputs": [
+        "Canary plan",
+        "Feature flag",
+        "Rollback runbook"
+      ],
+      "checks": [
+        "Rollback rehearsed in staging"
+      ],
+      "done": "Canary ready with automatic rollback.",
+      "does": "Prepares the production rollout: canary stages, feature flags and a rollback runbook, and rehearses the rollback.",
+      "tools": [
+        "CI/CD pipeline",
+        "Feature flags",
+        "IaC"
+      ]
+    },
+    "evidence": {
+      "name": "Evidence Bundler",
+      "role": "Attestation agent",
+      "phase": "Ship",
+      "tier": 0,
+      "tok": 0.3,
+      "hrs": 0.4,
+      "risk": "low",
+      "inputs": [
+        "All node evidence",
+        "Approvals log"
+      ],
+      "outputs": [
+        "Requirement → test → result trace",
+        "Signed attestation pack"
+      ],
+      "checks": [
+        "Every requirement has passing evidence",
+        "Signature verifies"
+      ],
+      "done": "Attestation pack complete and signed.",
+      "does": "Collects every test result, scan and approval into a signed requirement-to-evidence pack for audit.",
+      "tools": [
+        "Trace builder",
+        "SHA-256 signing"
+      ]
+    }
+  },
+  "gates": {
+    "scope": {
+      "name": "Scope sign-off",
+      "reviewer": "Product owner",
+      "mins": 25,
+      "risk": "med",
+      "sees": [
+        "Clarifying questions with proposed answers",
+        "Requirements with ambiguity scores"
+      ],
+      "approve": "Questions answered and scope accepted.",
+      "why": "A scope error multiplies cost in every node downstream."
+    },
+    "arch": {
+      "name": "Architecture review",
+      "reviewer": "Solution architect",
+      "mins": 45,
+      "risk": "high",
+      "sees": [
+        "ADRs with rejected alternatives",
+        "API contracts",
+        "Threat model"
+      ],
+      "approve": "ADRs accepted and contracts frozen.",
+      "why": "Contracts fan out to parallel builders. Changing them later restarts them all."
+    },
+    "dba": {
+      "name": "Schema change approval",
+      "reviewer": "DBA",
+      "mins": 20,
+      "risk": "high",
+      "sees": [
+        "Migration diff",
+        "Rehearsal log",
+        "Rollback script"
+      ],
+      "approve": "Rehearsal clean and rollback verified.",
+      "why": "Schema changes are the hardest step to undo in production."
+    },
+    "ux": {
+      "name": "UX review",
+      "reviewer": "Product designer",
+      "mins": 20,
+      "risk": "low",
+      "sees": [
+        "Screen recordings of each flow",
+        "Accessibility report"
+      ],
+      "approve": "Flows match the design system.",
+      "why": "Low risk, so it auto-passes at Balanced autonomy or higher."
+    },
+    "model": {
+      "name": "Model evaluation review",
+      "reviewer": "ML lead",
+      "mins": 35,
+      "risk": "med",
+      "sees": [
+        "Eval scores against golden set",
+        "Failure samples"
+      ],
+      "approve": "Eval thresholds met and failure modes accepted.",
+      "why": "AI output quality cannot be judged from code review alone."
+    },
+    "review": {
+      "name": "Risk-routed code review",
+      "reviewer": "Senior engineer",
+      "mins": 60,
+      "risk": "med",
+      "sees": [
+        "Only diffs scored high risk",
+        "Test and coverage deltas",
+        "Scan and compliance evidence"
+      ],
+      "approve": "High-risk diffs approved; the rest accepted on evidence.",
+      "why": "Spends senior attention only where a bug would be expensive."
+    },
+    "golive": {
+      "name": "Go-live approval",
+      "reviewer": "Delivery lead",
+      "mins": 15,
+      "risk": "high",
+      "sees": [
+        "Attestation pack",
+        "Canary plan"
+      ],
+      "approve": "Evidence complete and canary plan accepted.",
+      "why": "Production release is irreversible for users who see it."
+    }
+  },
+  "compilerTypes": [
+    "domain_model",
+    "architecture",
+    "data_migration",
+    "backend",
+    "integration",
+    "ui",
+    "workflow",
+    "ai_ml",
+    "infra",
+    "reporting"
+  ],
+  "sizes": {
+    "S": 0.5,
+    "M": 1,
+    "L": 2,
+    "XL": 3.5
+  },
+  "tiers": [
+    {
+      "name": "Economy",
+      "price": 1,
+      "tok": 1.3,
+      "time": 1.15,
+      "sig": 0.1
+    },
+    {
+      "name": "Balanced",
+      "price": 3,
+      "tok": 1,
+      "time": 1,
+      "sig": 0
+    },
+    {
+      "name": "Frontier",
+      "price": 9,
+      "tok": 0.85,
+      "time": 0.9,
+      "sig": -0.05
+    }
+  ],
+  "riskSigma": {
+    "low": 0.22,
+    "med": 0.35,
+    "high": 0.5
+  },
+  "routingShift": {
+    "Cost-first": -1,
+    "Balanced": 0,
+    "Quality-first": 1
+  },
+  "autonomy": {
+    "Guarded": {
+      "skip": [],
+      "rev": 1.3
+    },
+    "Balanced": {
+      "skip": [
+        "low"
+      ],
+      "rev": 1
+    },
+    "Bold": {
+      "skip": [
+        "low",
+        "med"
+      ],
+      "rev": 1
+    }
+  },
+  "skippedGateReworkWeight": {
+    "low": 0.05,
+    "med": 0.12,
+    "high": 0.2
+  },
+  "examples": {
+    "sample": "Providers need to see where each prior authorization stands without calling the payer. Submit PA requests from the portal using FHIR PAS, track status live, fall back to X12 278 for payers without FHIR, and keep an audit trail that meets HIPAA and CMS-0057-F decision timelines.",
+    "idr": "Build the dispute intake module for a No Surprises Act IDR platform. Billing teams upload batches of out-of-network claims (CSV or 837). The system checks federal IDR eligibility (open negotiation period expired, qualified item or service, 4-business-day initiation window), groups batchable claims, drafts the IDR initiation notice, and submits it to the federal IDR portal. Multi-tenant with tenant-level isolation and SOC 2 controls. Use AI to extract claim details from uploaded EOB PDFs. Include a dashboard of disputes by deadline and status.",
+    "sampleCustomer": "acme-health"
+  },
+  "profileFields": [
+    {
+      "key": "context",
+      "label": "Business context",
+      "hint": "Who the customer is, what they sell, who the users are"
+    },
+    {
+      "key": "techStack",
+      "label": "Tech stack",
+      "hint": "Languages, frameworks, databases, front-end libraries"
+    },
+    {
+      "key": "cloud",
+      "label": "Cloud and hosting",
+      "hint": "Cloud provider, regions, landing zone, messaging, identity"
+    },
+    {
+      "key": "systems",
+      "label": "Existing systems and partners",
+      "hint": "EHR, clearinghouses, payers, internal platforms to integrate with"
+    },
+    {
+      "key": "standards",
+      "label": "Engineering standards",
+      "hint": "Coding, API, testing, security and accessibility standards"
+    },
+    {
+      "key": "nfr",
+      "label": "Non-functional targets",
+      "hint": "Latency, availability, scale, data retention"
+    },
+    {
+      "key": "regulations",
+      "label": "Regulations and controls",
+      "hint": "HIPAA, SOC 2, CMS rules, internal policies"
+    },
+    {
+      "key": "team",
+      "label": "Team and delivery model",
+      "hint": "Who reviews what, approval bodies, release windows"
+    },
+    {
+      "key": "notes",
+      "label": "Other notes",
+      "hint": "Anything else the planner should respect"
+    }
+  ]
+}

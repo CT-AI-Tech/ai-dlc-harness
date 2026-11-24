@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI-DLC Journey</title>
+<link rel="stylesheet" href="__STYLE_URI__" />
+</head>
+<body>
+  <header id="header">
+    <div class="h-left">
+      <h1 id="feature-title">AI-DLC Journey</h1>
+      <div id="feature-sub" class="sub"></div>
+      <div class="switcher-row">
+        <select id="feature-switcher" aria-label="Viewing feature"></select>
+        <span id="viewing-badge" class="viewing-badge hidden">viewing only — not the active planning feature</span>
+      </div>
+    </div>
+    <nav id="artifact-links" class="h-right"></nav>
+  </header>
+
+  <main id="main">
+    <section id="graph-panel">
+      <h2>Design Plan</h2>
+      <div id="graph-empty" class="empty hidden"></div>
+      <div id="graph" class="graph"></div>
+      <div id="detail" class="detail hidden"></div>
+    </section>
+
+    <aside id="guardrails-panel">
+      <h2>Guardrails Considered</h2>
+      <div id="guardrails-empty" class="empty hidden"></div>
+      <div id="guardrails-list"></div>
+    </aside>
+
+    <section id="dev-panel">
+      <h2>Best Practices By Task / File</h2>
+      <div id="dev-empty" class="empty hidden"></div>
+      <div id="dev-groups"></div>
+    </section>
+
+    <section id="qa-panel">
+      <h2>Acceptance Scenarios</h2>
+      <div id="qa-empty" class="empty hidden"></div>
+      <div id="qa-scenarios"></div>
+      <h2 class="qa-guardrails-heading">Review Guardrails</h2>
+      <div id="qa-guardrails-empty" class="empty hidden"></div>
+      <div id="qa-guardrails-list"></div>
+    </section>
+  </main>
+
+  <footer id="notes"></footer>
+
+  <script>
+    window.__AIDLC_MODEL__ = __MODEL_JSON__;
+  </script>
+  <script src="__SCRIPT_URI__"></script>
+</body>
+</html>

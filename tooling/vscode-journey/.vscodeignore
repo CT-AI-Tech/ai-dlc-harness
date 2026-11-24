@@ -1,0 +1,9 @@
+src/**
+test-fixtures/**
+scripts/**
+dev-preview/**
+.vscode/**
+.gitignore
+tsconfig.json
+**/*.map
+**/*.ts
